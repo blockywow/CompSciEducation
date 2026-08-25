@@ -30,7 +30,9 @@ function getAllLessons(): Lesson[] {
 // (currently "think like a computer scientist"), not necessarily on
 // the first section - look it up instead of assuming an index.
 function getFinalTestSection() {
-  return course.find((section) => section.finalTest && section.finalTest.length > 0);
+  return course.find(
+    (section) => section.finalTest && section.finalTest.length > 0,
+  );
 }
 
 function toRomanNumeral(num: number): string {
@@ -66,15 +68,11 @@ function shuffleArray<T>(items: T[]): T[] {
   return result;
 }
 
-function shuffleQuestions(
-  questions: QuizQuestion[] = []
-): ShuffledQuestion[] {
+function shuffleQuestions(questions: QuizQuestion[] = []): ShuffledQuestion[] {
   const shuffledQuestions = shuffleArray(questions);
 
   return shuffledQuestions.map((question) => {
-    const answerOrder = shuffleArray(
-      question.answers.map((_, index) => index)
-    );
+    const answerOrder = shuffleArray(question.answers.map((_, index) => index));
 
     return {
       question: question.question,
@@ -92,7 +90,7 @@ export default function App() {
 
   const [currentLesson, setCurrentLesson] = useState(0);
   const [completed, setCompleted] = useState<number[]>([]);
-
+  const [quizCorrect, setQuizCorrect] = useState(false);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
@@ -100,21 +98,21 @@ export default function App() {
 
   const [viewingFinalTest, setViewingFinalTest] = useState(false);
   const [finalTestSubmitted, setFinalTestSubmitted] = useState(false);
-  const [finalTestAnswers, setFinalTestAnswers] =
-    useState<Record<number, number>>({});
+  const [finalTestAnswers, setFinalTestAnswers] = useState<
+    Record<number, number>
+  >({});
   const [finalTestPassed, setFinalTestPassed] = useState(false);
   const [finalTestCompleted, setFinalTestCompleted] = useState(false);
 
   const [viewingCompletion, setViewingCompletion] = useState(false);
 
   const [shuffledQuiz, setShuffledQuiz] = useState<ShuffledQuestion[]>(() =>
-    allLessons[0]
-      ? shuffleQuestions(allLessons[0].quiz)
-      : []
+    allLessons[0] ? shuffleQuestions(allLessons[0].quiz) : [],
   );
 
-  const [shuffledFinalTest, setShuffledFinalTest] =
-    useState<ShuffledQuestion[]>([]);
+  const [shuffledFinalTest, setShuffledFinalTest] = useState<
+    ShuffledQuestion[]
+  >([]);
 
   useEffect(() => {
     loadProgress();
@@ -128,13 +126,10 @@ export default function App() {
         setCompleted(JSON.parse(saved));
       }
 
-      const finalTestSaved =
-        localStorage.getItem(FINAL_TEST_KEY);
+      const finalTestSaved = localStorage.getItem(FINAL_TEST_KEY);
 
       if (finalTestSaved) {
-        setFinalTestCompleted(
-          JSON.parse(finalTestSaved)
-        );
+        setFinalTestCompleted(JSON.parse(finalTestSaved));
       }
     } catch {
       // Ignore invalid saved data
@@ -144,10 +139,7 @@ export default function App() {
   function saveProgress(progress: number[]) {
     setCompleted(progress);
 
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(progress)
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   }
 
   function isUnlocked(index: number) {
@@ -157,8 +149,7 @@ export default function App() {
   }
 
   const finalTestUnlocked =
-    allLessons.length > 0 &&
-    completed.includes(allLessons.length - 1);
+    allLessons.length > 0 && completed.includes(allLessons.length - 1);
 
   function selectLesson(index: number) {
     if (!isUnlocked(index)) return;
@@ -168,10 +159,8 @@ export default function App() {
     setQuizSubmitted(false);
     setViewingFinalTest(false);
     setViewingCompletion(false);
-
-    setShuffledQuiz(
-      shuffleQuestions(allLessons[index].quiz)
-    );
+    setQuizCorrect(false);
+    setShuffledQuiz(shuffleQuestions(allLessons[index].quiz));
 
     if (width < 900) {
       setMobileMenu(false);
@@ -188,9 +177,7 @@ export default function App() {
     setFinalTestPassed(false);
 
     if (finalTestSection?.finalTest) {
-      setShuffledFinalTest(
-        shuffleQuestions(finalTestSection.finalTest)
-      );
+      setShuffledFinalTest(shuffleQuestions(finalTestSection.finalTest));
     }
 
     if (width < 900) {
@@ -209,10 +196,7 @@ export default function App() {
     }
   }
 
-  function chooseAnswer(
-    questionIndex: number,
-    answerIndex: number
-  ) {
+  function chooseAnswer(questionIndex: number, answerIndex: number) {
     if (quizSubmitted) return;
 
     setAnswers((previous) => ({
@@ -235,12 +219,11 @@ export default function App() {
     if (shuffledQuiz.length === 0) return;
 
     const correct = shuffledQuiz.every(
-      (question, index) =>
-        answers[index] === question.correct
+      (question, index) => answers[index] === question.correct,
     );
 
     setQuizSubmitted(true);
-
+    setQuizCorrect(correct);
     if (correct) {
       completeCurrentLesson();
     }
@@ -249,16 +232,11 @@ export default function App() {
   function retryQuiz() {
     setAnswers({});
     setQuizSubmitted(false);
-
-    setShuffledQuiz(
-      shuffleQuestions(allLessons[currentLesson].quiz)
-    );
+    setQuizCorrect(false);
+    setShuffledQuiz(shuffleQuestions(allLessons[currentLesson].quiz));
   }
 
-  function chooseFinalTestAnswer(
-    questionIndex: number,
-    answerIndex: number
-  ) {
+  function chooseFinalTestAnswer(questionIndex: number, answerIndex: number) {
     if (finalTestSubmitted) return;
 
     setFinalTestAnswers((previous) => ({
@@ -271,8 +249,7 @@ export default function App() {
     if (shuffledFinalTest.length === 0) return;
 
     const correct = shuffledFinalTest.every(
-      (question, index) =>
-        finalTestAnswers[index] === question.correct
+      (question, index) => finalTestAnswers[index] === question.correct,
     );
 
     setFinalTestSubmitted(true);
@@ -281,10 +258,7 @@ export default function App() {
     if (correct) {
       setFinalTestCompleted(true);
 
-      localStorage.setItem(
-        FINAL_TEST_KEY,
-        JSON.stringify(true)
-      );
+      localStorage.setItem(FINAL_TEST_KEY, JSON.stringify(true));
     }
   }
 
@@ -294,45 +268,32 @@ export default function App() {
     setFinalTestPassed(false);
 
     if (finalTestSection?.finalTest) {
-      setShuffledFinalTest(
-        shuffleQuestions(finalTestSection.finalTest)
-      );
+      setShuffledFinalTest(shuffleQuestions(finalTestSection.finalTest));
     }
   }
-
+  const quizPassed = quizSubmitted
+    ? quizCorrect
+    : completed.includes(currentLesson);
   const lesson = allLessons[currentLesson];
-
-  const quizPassed = completed.includes(currentLesson);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.layout}>
-
         {/* SIDEBAR */}
 
         {(width >= 900 || mobileMenu) && (
           <View style={styles.sidebar}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-            >
+            <ScrollView showsVerticalScrollIndicator={false}>
               {course.map((section) => (
-                <View
-                  key={section.title}
-                  style={styles.section}
-                >
-                  <Text style={styles.sectionTitle}>
-                    {section.title}
-                  </Text>
+                <View key={section.title} style={styles.section}>
+                  <Text style={styles.sectionTitle}>{section.title}</Text>
 
                   {section.lessons.map((lessonItem) => {
-                    const index =
-                      allLessons.indexOf(lessonItem);
+                    const index = allLessons.indexOf(lessonItem);
 
-                    const unlocked =
-                      isUnlocked(index);
+                    const unlocked = isUnlocked(index);
 
-                    const completedLesson =
-                      completed.includes(index);
+                    const completedLesson = completed.includes(index);
 
                     const active =
                       !viewingFinalTest &&
@@ -342,41 +303,30 @@ export default function App() {
                     return (
                       <Pressable
                         key={lessonItem.title}
-                        onPress={() =>
-                          selectLesson(index)
-                        }
+                        onPress={() => selectLesson(index)}
                         disabled={!unlocked}
                         style={[
                           styles.lessonButton,
-                          active &&
-                          styles.lessonButtonActive,
-                          !unlocked &&
-                          styles.lessonButtonLocked,
+                          active && styles.lessonButtonActive,
+                          !unlocked && styles.lessonButtonLocked,
                         ]}
                       >
                         <View
                           style={[
                             styles.lessonNumber,
-                            completedLesson &&
-                            styles.lessonNumberComplete,
-                            active &&
-                            styles.lessonNumberActive,
+                            completedLesson && styles.lessonNumberComplete,
+                            active && styles.lessonNumberActive,
                           ]}
                         >
                           <Text
                             style={[
                               styles.lessonNumberText,
                               completedLesson &&
-                              styles.lessonNumberTextComplete,
-                              active &&
-                              styles.lessonNumberTextActive,
+                                styles.lessonNumberTextComplete,
+                              active && styles.lessonNumberTextActive,
                             ]}
                           >
-                            {completedLesson
-                              ? ":D"
-                              : toRomanNumeral(
-                                index + 1
-                              )}
+                            {completedLesson ? ":D" : toRomanNumeral(index + 1)}
                           </Text>
                         </View>
 
@@ -384,10 +334,8 @@ export default function App() {
                           numberOfLines={1}
                           style={[
                             styles.lessonButtonText,
-                            active &&
-                            styles.lessonButtonTextActive,
-                            !unlocked &&
-                            styles.lessonButtonTextLocked,
+                            active && styles.lessonButtonTextActive,
+                            !unlocked && styles.lessonButtonTextLocked,
                           ]}
                         >
                           {lessonItem.title}
@@ -401,44 +349,34 @@ export default function App() {
               {/* FINAL ASSESSMENT */}
 
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>
-                  final assessment
-                </Text>
+                <Text style={styles.sectionTitle}>final assessment</Text>
 
                 <Pressable
                   onPress={enterFinalTest}
                   disabled={!finalTestUnlocked}
                   style={[
                     styles.lessonButton,
-                    viewingFinalTest &&
-                    styles.lessonButtonActive,
-                    !finalTestUnlocked &&
-                    styles.lessonButtonLocked,
+                    viewingFinalTest && styles.lessonButtonActive,
+                    !finalTestUnlocked && styles.lessonButtonLocked,
                   ]}
                 >
                   <View
                     style={[
                       styles.lessonNumber,
-                      finalTestCompleted &&
-                      styles.lessonNumberComplete,
-                      viewingFinalTest &&
-                      styles.lessonNumberActive,
+                      finalTestCompleted && styles.lessonNumberComplete,
+                      viewingFinalTest && styles.lessonNumberActive,
                     ]}
                   >
                     <Text
                       style={[
                         styles.lessonNumberText,
-                        finalTestCompleted &&
-                        styles.lessonNumberTextComplete,
-                        viewingFinalTest &&
-                        styles.lessonNumberTextActive,
+                        finalTestCompleted && styles.lessonNumberTextComplete,
+                        viewingFinalTest && styles.lessonNumberTextActive,
                       ]}
                     >
                       {finalTestCompleted
                         ? ":D"
-                        : toRomanNumeral(
-                          allLessons.length + 1
-                        )}
+                        : toRomanNumeral(allLessons.length + 1)}
                     </Text>
                   </View>
 
@@ -446,10 +384,8 @@ export default function App() {
                     numberOfLines={1}
                     style={[
                       styles.lessonButtonText,
-                      viewingFinalTest &&
-                      styles.lessonButtonTextActive,
-                      !finalTestUnlocked &&
-                      styles.lessonButtonTextLocked,
+                      viewingFinalTest && styles.lessonButtonTextActive,
+                      !finalTestUnlocked && styles.lessonButtonTextLocked,
                     ]}
                   >
                     final exam
@@ -461,32 +397,27 @@ export default function App() {
 
               {finalTestCompleted && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>
-                    completion
-                  </Text>
+                  <Text style={styles.sectionTitle}>completion</Text>
 
                   <Pressable
                     onPress={enterCompletion}
                     style={[
                       styles.lessonButton,
-                      viewingCompletion &&
-                      styles.lessonButtonActive,
+                      viewingCompletion && styles.lessonButtonActive,
                     ]}
                   >
                     <View
                       style={[
                         styles.lessonNumber,
                         styles.lessonNumberComplete,
-                        viewingCompletion &&
-                        styles.lessonNumberActive,
+                        viewingCompletion && styles.lessonNumberActive,
                       ]}
                     >
                       <Text
                         style={[
                           styles.lessonNumberText,
                           styles.lessonNumberTextComplete,
-                          viewingCompletion &&
-                          styles.lessonNumberTextActive,
+                          viewingCompletion && styles.lessonNumberTextActive,
                         ]}
                       >
                         :D
@@ -497,8 +428,7 @@ export default function App() {
                       numberOfLines={1}
                       style={[
                         styles.lessonButtonText,
-                        viewingCompletion &&
-                        styles.lessonButtonTextActive,
+                        viewingCompletion && styles.lessonButtonTextActive,
                       ]}
                     >
                       you did it!
@@ -516,22 +446,16 @@ export default function App() {
           style={styles.main}
           contentContainerStyle={styles.mainContent}
         >
-
           {/* NORMAL LESSON */}
 
           {!viewingFinalTest && !viewingCompletion && (
             <>
               <View style={styles.lessonHeader}>
                 <Text style={styles.lessonLabel}>
-                  lesson{" "}
-                  {toRomanNumeral(
-                    currentLesson + 1
-                  )}
+                  lesson {toRomanNumeral(currentLesson + 1)}
                 </Text>
 
-                <Text style={styles.lessonTitle}>
-                  {lesson.title}
-                </Text>
+                <Text style={styles.lessonTitle}>{lesson.title}</Text>
 
                 <Text style={styles.lessonDescription}>
                   {lesson.description}
@@ -552,24 +476,13 @@ export default function App() {
                     allowFullScreen
                   />
                 ) : (
-                  <View
-                    style={styles.videoPlaceholder}
-                  >
-                    <Text
-                      style={
-                        styles.videoPlaceholderTitle
-                      }
-                    >
+                  <View style={styles.videoPlaceholder}>
+                    <Text style={styles.videoPlaceholderTitle}>
                       video goes here
                     </Text>
 
-                    <Text
-                      style={
-                        styles.videoPlaceholderText
-                      }
-                    >
-                      add a youtube video id in
-                      course.ts
+                    <Text style={styles.videoPlaceholderText}>
+                      add a youtube video id in course.ts
                     </Text>
                   </View>
                 )}
@@ -579,189 +492,98 @@ export default function App() {
 
               {shuffledQuiz.length > 0 ? (
                 <View style={styles.card}>
-                  <Text style={styles.cardTitle}>
-                    quick check
-                  </Text>
+                  <Text style={styles.cardTitle}>quick check</Text>
 
                   <Text style={styles.quizSubtitle}>
-                    answer all three questions
-                    correctly to unlock the next
+                    answer all three questions correctly to unlock the next
                     lesson.
                   </Text>
 
-                  {shuffledQuiz.map(
-                    (question, questionIndex) => (
-                      <View
-                        key={questionIndex}
-                        style={styles.question}
-                      >
-                        <Text
-                          style={styles.questionText}
-                        >
-                          {questionIndex + 1}.{" "}
-                          {question.question}
-                        </Text>
+                  {shuffledQuiz.map((question, questionIndex) => (
+                    <View key={questionIndex} style={styles.question}>
+                      <Text style={styles.questionText}>
+                        {questionIndex + 1}. {question.question}
+                      </Text>
 
-                        {question.answers.map(
-                          (
-                            answer,
-                            answerIndex
-                          ) => {
-                            const selected =
-                              answers[
-                              questionIndex
-                              ] === answerIndex;
+                      {question.answers.map((answer, answerIndex) => {
+                        const selected = answers[questionIndex] === answerIndex;
 
-                            const correct =
-                              question.correct ===
-                              answerIndex;
+                        const correct = question.correct === answerIndex;
 
-                            let answerStyle =
-                              styles.answer;
+                        let answerStyle = styles.answer;
 
-                            if (quizSubmitted) {
-                              if (
-                                quizPassed &&
-                                correct
-                              ) {
-                                answerStyle =
-                                  styles.answerCorrect;
-                              } else if (
-                                !quizPassed &&
-                                selected
-                              ) {
-                                answerStyle =
-                                  styles.answerWrong;
-                              }
-                            }
-
-                            if (
-                              selected &&
-                              !quizSubmitted
-                            ) {
-                              answerStyle =
-                                styles.answerSelected;
-                            }
-
-                            return (
-                              <Pressable
-                                key={answer}
-                                onPress={() =>
-                                  chooseAnswer(
-                                    questionIndex,
-                                    answerIndex
-                                  )
-                                }
-                                style={answerStyle}
-                              >
-                                <Text
-                                  style={
-                                    styles.answerText
-                                  }
-                                >
-                                  {answer}
-                                </Text>
-                              </Pressable>
-                            );
+                        if (quizSubmitted) {
+                          if (quizPassed && correct) {
+                            answerStyle = styles.answerCorrect;
+                          } else if (!quizPassed && selected) {
+                            answerStyle = styles.answerWrong;
                           }
-                        )}
-                      </View>
-                    )
-                  )}
+                        }
+
+                        if (selected && !quizSubmitted) {
+                          answerStyle = styles.answerSelected;
+                        }
+
+                        return (
+                          <Pressable
+                            key={answer}
+                            onPress={() =>
+                              chooseAnswer(questionIndex, answerIndex)
+                            }
+                            style={answerStyle}
+                          >
+                            <Text style={styles.answerText}>{answer}</Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  ))}
 
                   {!quizSubmitted && (
                     <Pressable
                       onPress={submitQuiz}
                       disabled={
-                        Object.keys(answers)
-                          .length !==
-                        shuffledQuiz.length
+                        Object.keys(answers).length !== shuffledQuiz.length
                       }
                       style={[
                         styles.submitButton,
-                        Object.keys(answers)
-                          .length !==
-                        shuffledQuiz.length &&
-                        styles.submitButtonDisabled,
+                        Object.keys(answers).length !== shuffledQuiz.length &&
+                          styles.submitButtonDisabled,
                       ]}
                     >
-                      <Text
-                        style={
-                          styles.submitButtonText
-                        }
-                      >
-                        check answers
-                      </Text>
+                      <Text style={styles.submitButtonText}>check answers</Text>
                     </Pressable>
                   )}
 
-                  {quizSubmitted &&
-                    quizPassed && (
-                      <View
-                        style={[
-                          styles.result,
-                          styles.resultSuccess,
-                        ]}
-                      >
-                        <Text
-                          style={
-                            styles.successText
-                          }
-                        >
-                          {currentLesson ===
-                            allLessons.length - 1
-                            ? "you completed the course!"
-                            : "correct! the next lesson is unlocked."}
-                        </Text>
-                      </View>
-                    )}
+                  {quizSubmitted && quizPassed && (
+                    <View style={[styles.result, styles.resultSuccess]}>
+                      <Text style={styles.successText}>
+                        {currentLesson === allLessons.length - 1
+                          ? "you completed the course!"
+                          : "correct! the next lesson is unlocked."}
+                      </Text>
+                    </View>
+                  )}
 
-                  {quizSubmitted &&
-                    !quizPassed && (
-                      <View
-                        style={[
-                          styles.result,
-                          styles.resultFailure,
-                        ]}
-                      >
-                        <Text
-                          style={
-                            styles.failureText
-                          }
-                        >
-                          not quite. review the
-                          lesson and try again.
-                        </Text>
+                  {quizSubmitted && !quizPassed && (
+                    <View style={[styles.result, styles.resultFailure]}>
+                      <Text style={styles.failureText}>
+                        not quite. review the lesson and try again.
+                      </Text>
 
-                        <Pressable
-                          onPress={retryQuiz}
-                          style={
-                            styles.retryButton
-                          }
-                        >
-                          <Text
-                            style={
-                              styles.retryButtonText
-                            }
-                          >
-                            try again
-                          </Text>
-                        </Pressable>
-                      </View>
-                    )}
+                      <Pressable onPress={retryQuiz} style={styles.retryButton}>
+                        <Text style={styles.retryButtonText}>try again</Text>
+                      </Pressable>
+                    </View>
+                  )}
                 </View>
               ) : (
                 <View style={styles.card}>
-                  <Text style={styles.cardTitle}>
-                    ready?
-                  </Text>
+                  <Text style={styles.cardTitle}>ready?</Text>
 
-                  <Text
-                    style={styles.quizSubtitle}
-                  >
-                    there's no quiz for this
-                    section. continue when
-                    you're ready.
+                  <Text style={styles.quizSubtitle}>
+                    there's no quiz for this section. continue when you're
+                    ready.
                   </Text>
 
                   <Pressable
@@ -769,18 +591,11 @@ export default function App() {
                     disabled={quizPassed}
                     style={[
                       styles.submitButton,
-                      quizPassed &&
-                      styles.submitButtonDisabled,
+                      quizPassed && styles.submitButtonDisabled,
                     ]}
                   >
-                    <Text
-                      style={
-                        styles.submitButtonText
-                      }
-                    >
-                      {quizPassed
-                        ? "completed"
-                        : "continue"}
+                    <Text style={styles.submitButtonText}>
+                      {quizPassed ? "completed" : "continue"}
                     </Text>
                   </Pressable>
                 </View>
@@ -791,62 +606,30 @@ export default function App() {
               <View style={styles.navigation}>
                 {currentLesson > 0 && (
                   <Pressable
-                    onPress={() =>
-                      selectLesson(
-                        currentLesson - 1
-                      )
-                    }
+                    onPress={() => selectLesson(currentLesson - 1)}
                     style={styles.secondaryButton}
                   >
-                    <Text
-                      style={
-                        styles.secondaryButtonText
-                      }
-                    >
-                      previous
-                    </Text>
+                    <Text style={styles.secondaryButtonText}>previous</Text>
                   </Pressable>
                 )}
 
-                {currentLesson <
-                  allLessons.length - 1 &&
-                  completed.includes(
-                    currentLesson
-                  ) && (
+                {currentLesson < allLessons.length - 1 &&
+                  completed.includes(currentLesson) && (
                     <Pressable
-                      onPress={() =>
-                        selectLesson(
-                          currentLesson + 1
-                        )
-                      }
+                      onPress={() => selectLesson(currentLesson + 1)}
                       style={styles.primaryButton}
                     >
-                      <Text
-                        style={
-                          styles.primaryButtonText
-                        }
-                      >
-                        next lesson
-                      </Text>
+                      <Text style={styles.primaryButtonText}>next lesson</Text>
                     </Pressable>
                   )}
 
-                {currentLesson ===
-                  allLessons.length - 1 &&
-                  completed.includes(
-                    currentLesson
-                  ) && (
+                {currentLesson === allLessons.length - 1 &&
+                  completed.includes(currentLesson) && (
                     <Pressable
                       onPress={enterFinalTest}
                       style={styles.primaryButton}
                     >
-                      <Text
-                        style={
-                          styles.primaryButtonText
-                        }
-                      >
-                        final exam
-                      </Text>
+                      <Text style={styles.primaryButtonText}>final exam</Text>
                     </Pressable>
                   )}
               </View>
@@ -858,231 +641,121 @@ export default function App() {
           {viewingFinalTest && (
             <>
               <View style={styles.lessonHeader}>
-                <Text style={styles.lessonLabel}>
-                  final test
-                </Text>
+                <Text style={styles.lessonLabel}>final test</Text>
 
-                <Text style={styles.lessonTitle}>
-                  comprehensive exam
-                </Text>
+                <Text style={styles.lessonTitle}>comprehensive exam</Text>
 
-                <Text
-                  style={styles.lessonDescription}
-                >
-                  test your knowledge across all
-                  topics covered in this course.
-                  answer every question correctly
-                  to pass.
+                <Text style={styles.lessonDescription}>
+                  test your knowledge across all topics covered in this course.
+                  answer every question correctly to pass.
                 </Text>
               </View>
 
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>
-                  final assessment
-                </Text>
+                <Text style={styles.cardTitle}>final assessment</Text>
 
                 <Text style={styles.quizSubtitle}>
-                  answer all questions correctly
-                  to pass the final exam.
+                  answer all questions correctly to pass the final exam.
                 </Text>
 
-                {shuffledFinalTest.map(
-                  (question, questionIndex) => (
-                    <View
-                      key={questionIndex}
-                      style={styles.question}
-                    >
-                      <Text
-                        style={styles.questionText}
-                      >
-                        {questionIndex + 1}.{" "}
-                        {question.question}
-                      </Text>
+                {shuffledFinalTest.map((question, questionIndex) => (
+                  <View key={questionIndex} style={styles.question}>
+                    <Text style={styles.questionText}>
+                      {questionIndex + 1}. {question.question}
+                    </Text>
 
-                      {question.answers.map(
-                        (
-                          answer,
-                          answerIndex
-                        ) => {
-                          const selected =
-                            finalTestAnswers[
-                            questionIndex
-                            ] === answerIndex;
+                    {question.answers.map((answer, answerIndex) => {
+                      const selected =
+                        finalTestAnswers[questionIndex] === answerIndex;
 
-                          const correct =
-                            question.correct ===
-                            answerIndex;
+                      const correct = question.correct === answerIndex;
 
-                          let answerStyle =
-                            styles.answer;
+                      let answerStyle = styles.answer;
 
-                          if (finalTestSubmitted) {
-                            if (
-                              finalTestPassed &&
-                              correct
-                            ) {
-                              answerStyle =
-                                styles.answerCorrect;
-                            } else if (
-                              !finalTestPassed &&
-                              selected
-                            ) {
-                              answerStyle =
-                                styles.answerWrong;
-                            }
-                          }
-
-                          if (
-                            selected &&
-                            !finalTestSubmitted
-                          ) {
-                            answerStyle =
-                              styles.answerSelected;
-                          }
-
-                          return (
-                            <Pressable
-                              key={answer}
-                              onPress={() =>
-                                chooseFinalTestAnswer(
-                                  questionIndex,
-                                  answerIndex
-                                )
-                              }
-                              style={answerStyle}
-                            >
-                              <Text
-                                style={
-                                  styles.answerText
-                                }
-                              >
-                                {answer}
-                              </Text>
-                            </Pressable>
-                          );
+                      if (finalTestSubmitted) {
+                        if (finalTestPassed && correct) {
+                          answerStyle = styles.answerCorrect;
+                        } else if (!finalTestPassed && selected) {
+                          answerStyle = styles.answerWrong;
                         }
-                      )}
-                    </View>
-                  )
-                )}
+                      }
+
+                      if (selected && !finalTestSubmitted) {
+                        answerStyle = styles.answerSelected;
+                      }
+
+                      return (
+                        <Pressable
+                          key={answer}
+                          onPress={() =>
+                            chooseFinalTestAnswer(questionIndex, answerIndex)
+                          }
+                          style={answerStyle}
+                        >
+                          <Text style={styles.answerText}>{answer}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ))}
 
                 {!finalTestSubmitted && (
                   <Pressable
                     onPress={submitFinalTest}
                     disabled={
-                      shuffledFinalTest.length ===
-                      0 ||
-                      Object.keys(
-                        finalTestAnswers
-                      ).length !==
-                      shuffledFinalTest.length
+                      shuffledFinalTest.length === 0 ||
+                      Object.keys(finalTestAnswers).length !==
+                        shuffledFinalTest.length
                     }
                     style={[
                       styles.submitButton,
-                      (
-                        shuffledFinalTest.length ===
-                        0 ||
-                        Object.keys(
-                          finalTestAnswers
-                        ).length !==
-                        shuffledFinalTest.length
-                      ) &&
-                      styles.submitButtonDisabled,
+                      (shuffledFinalTest.length === 0 ||
+                        Object.keys(finalTestAnswers).length !==
+                          shuffledFinalTest.length) &&
+                        styles.submitButtonDisabled,
                     ]}
                   >
-                    <Text
-                      style={
-                        styles.submitButtonText
-                      }
-                    >
-                      submit exam
-                    </Text>
+                    <Text style={styles.submitButtonText}>submit exam</Text>
                   </Pressable>
                 )}
 
-                {finalTestSubmitted &&
-                  finalTestPassed && (
-                    <View
-                      style={[
-                        styles.result,
-                        styles.resultSuccess,
-                      ]}
+                {finalTestSubmitted && finalTestPassed && (
+                  <View style={[styles.result, styles.resultSuccess]}>
+                    <Text style={styles.successText}>
+                      congratulations! you passed the final exam.
+                    </Text>
+
+                    <Pressable
+                      onPress={enterCompletion}
+                      style={styles.retryButton}
                     >
-                      <Text
-                        style={
-                          styles.successText
-                        }
-                      >
-                        congratulations! you passed
-                        the final exam.
-                      </Text>
+                      <Text style={styles.retryButtonText}>continue</Text>
+                    </Pressable>
+                  </View>
+                )}
 
-                      <Pressable
-                        onPress={
-                          enterCompletion
-                        }
-                        style={styles.retryButton}
-                      >
-                        <Text
-                          style={
-                            styles.retryButtonText
-                          }
-                        >
-                          continue
-                        </Text>
-                      </Pressable>
-                    </View>
-                  )}
+                {finalTestSubmitted && !finalTestPassed && (
+                  <View style={[styles.result, styles.resultFailure]}>
+                    <Text style={styles.failureText}>
+                      not quite. review the material and try again.
+                    </Text>
 
-                {finalTestSubmitted &&
-                  !finalTestPassed && (
-                    <View
-                      style={[
-                        styles.result,
-                        styles.resultFailure,
-                      ]}
+                    <Pressable
+                      onPress={retryFinalTest}
+                      style={styles.retryButton}
                     >
-                      <Text
-                        style={
-                          styles.failureText
-                        }
-                      >
-                        not quite. review the
-                        material and try again.
-                      </Text>
-
-                      <Pressable
-                        onPress={
-                          retryFinalTest
-                        }
-                        style={
-                          styles.retryButton
-                        }
-                      >
-                        <Text
-                          style={
-                            styles.retryButtonText
-                          }
-                        >
-                          try again
-                        </Text>
-                      </Pressable>
-                    </View>
-                  )}
+                      <Text style={styles.retryButtonText}>try again</Text>
+                    </Pressable>
+                  </View>
+                )}
               </View>
 
               <View style={styles.navigation}>
                 <Pressable
-                  onPress={() =>
-                    setViewingFinalTest(false)
-                  }
+                  onPress={() => setViewingFinalTest(false)}
                   style={styles.secondaryButton}
                 >
-                  <Text
-                    style={
-                      styles.secondaryButtonText
-                    }
-                  >
+                  <Text style={styles.secondaryButtonText}>
                     back to lessons
                   </Text>
                 </Pressable>
@@ -1095,17 +768,11 @@ export default function App() {
           {viewingCompletion && (
             <>
               <View style={styles.lessonHeader}>
-                <Text style={styles.lessonLabel}>
-                  course complete
-                </Text>
+                <Text style={styles.lessonLabel}>course complete</Text>
 
-                <Text style={styles.lessonTitle}>
-                  {completion.title}
-                </Text>
+                <Text style={styles.lessonTitle}>{completion.title}</Text>
 
-                <Text
-                  style={styles.lessonDescription}
-                >
+                <Text style={styles.lessonDescription}>
                   {completion.description}
                 </Text>
               </View>
@@ -1122,37 +789,22 @@ export default function App() {
                     allowFullScreen
                   />
                 ) : (
-                  <View
-                    style={styles.videoPlaceholder}
-                  >
-                    <Text
-                      style={
-                        styles.videoPlaceholderTitle
-                      }
-                    >
+                  <View style={styles.videoPlaceholder}>
+                    <Text style={styles.videoPlaceholderTitle}>
                       congratulations video
                     </Text>
 
-                    <Text
-                      style={
-                        styles.videoPlaceholderText
-                      }
-                    >
-                      add a youtube video id in
-                      course.ts
+                    <Text style={styles.videoPlaceholderText}>
+                      add a youtube video id in course.ts
                     </Text>
                   </View>
                 )}
               </View>
 
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>
-                  what's next?
-                </Text>
+                <Text style={styles.cardTitle}>what's next?</Text>
 
-                <Text style={styles.bodyText}>
-                  {completion.content}
-                </Text>
+                <Text style={styles.bodyText}>{completion.content}</Text>
               </View>
             </>
           )}
