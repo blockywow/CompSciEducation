@@ -143,7 +143,7 @@ export default function App() {
   }
 
   function isUnlocked(index: number) {
-    if (index === 0) return true;
+    if (index > -1) return true;
 
     return completed.includes(index - 1);
   }
